@@ -34,6 +34,8 @@ export default function ResumeScreening() {
     loading,
     resumes,
     setResumes,
+    talentProfilesLoaded,
+    loadTalentProfiles,
   } = useAppStore();
 
   const [resumeContent, setResumeContent] = useState('');
@@ -44,6 +46,12 @@ export default function ResumeScreening() {
   useEffect(() => {
     setResumes(mockResumes);
   }, [setResumes]);
+
+  useEffect(() => {
+    if (!talentProfilesLoaded) {
+      loadTalentProfiles();
+    }
+  }, [talentProfilesLoaded, loadTalentProfiles]);
 
   const handleUpload = async () => {
     if (!resumeContent.trim()) return;

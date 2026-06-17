@@ -7,7 +7,9 @@ import type {
   InterviewEvaluation,
   HiringRecommendation,
   JobDescriptionForm,
+  HighPerformerProfile,
 } from '../../shared/types';
+import { api } from '../utils/api';
 
 interface AppState {
   currentJobPosition: JobPosition | null;
@@ -40,6 +42,14 @@ interface AppState {
 
   activeTab: string;
   setActiveTab: (tab: string) => void;
+
+  talentProfiles: HighPerformerProfile[];
+  talentProfilesLoaded: boolean;
+  setTalentProfiles: (profiles: HighPerformerProfile[]) => void;
+  addTalentProfile: (profile: HighPerformerProfile) => void;
+  updateTalentProfile: (id: string, updates: Partial<Omit<HighPerformerProfile, 'id'>>) => void;
+  removeTalentProfile: (id: string) => void;
+  loadTalentProfiles: (params?: { department?: string; position?: string }) => Promise<void>;
 
   resetState: () => void;
 }
@@ -79,6 +89,31 @@ export const useAppStore = create<AppState>((set) => ({
 
   activeTab: 'home',
   setActiveTab: (tab) => set({ activeTab: tab }),
+
+  talentProfiles: [],
+  talentProfilesLoaded: false,
+  setTalentProfiles: (profiles) => set({ talentProfiles: profiles, talentProfilesLoaded: true }),
+  addTalentProfile: (profile) =>
+    set((state) => ({ talentProfiles: [...state.talentProfiles, profile] })),
+  updateTalentProfile: (id, updates) =>
+    set((state) => ({
+      talentProfiles: state.talentProfiles.map((p) =>
+        p.id === id ? { ...p, ...updates } : p
+      ),
+    })),
+  removeTalentProfile: (id) =>
+    set((state) => ({
+      talentProfiles: state.talentProfiles.filter((p) => p.id !== id),
+    })),
+  loadTalentProfiles: async (params) => {
+    try {
+      const result = await api.talentProfiles.list(params);
+      set({ talentProfiles: result.profiles, talentProfilesLoaded: true });
+    } catch (error) {
+      console.error('加载人才画像失败:', error);
+      set({ talentProfilesLoaded: true });
+    }
+  },
 
   resetState: () =>
     set({

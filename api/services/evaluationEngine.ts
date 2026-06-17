@@ -9,7 +9,10 @@ import type {
   FitPoint,
 } from '../../shared/types';
 import { analyzeResume } from './resumeAnalyzer';
-import { highPerformerProfiles } from '../data/mockData';
+import {
+  talentProfileStore,
+  getTalentProfilesByDepartment,
+} from './talentProfileStore';
 
 export function generateHiringRecommendation(
   resume: Resume,
@@ -281,11 +284,14 @@ export function getScoreLevel(score: number): {
 
 export function matchTalentProfile(
   resume: Resume,
-  jobPosition: JobPosition
+  jobPosition: JobPosition,
+  customProfiles?: HighPerformerProfile[]
 ): TalentProfileMatchResult {
-  const relevantProfiles = highPerformerProfiles.filter(
-    p => p.department === jobPosition.department
-  );
+  const availableProfiles = customProfiles ?? talentProfileStore.getAll();
+
+  const relevantProfiles = availableProfiles.length > 0
+    ? getTalentProfilesByDepartment(jobPosition.department)
+    : [];
 
   const targetProfile = relevantProfiles.length > 0
     ? relevantProfiles.reduce((best, current) => {
@@ -293,7 +299,21 @@ export function matchTalentProfile(
         const currentMatch = calculateProfileMatchScore(resume, current);
         return currentMatch > bestMatch ? current : best;
       })
-    : highPerformerProfiles[0];
+    : availableProfiles[0];
+
+  if (!targetProfile) {
+    return {
+      overallConfidence: 0,
+      skillMatch: { score: 0, matchedSkills: [], details: '暂无可用的绩优员工画像数据' },
+      projectMatch: { score: 0, matchedProjectTypes: [], details: '暂无可用的绩优员工画像数据' },
+      careerMatch: { score: 0, matchedTrajectory: [], details: '暂无可用的绩优员工画像数据' },
+      strengthMatch: { score: 0, matchedStrengths: [], details: '暂无可用的绩优员工画像数据' },
+      keyFitPoints: [],
+      potentialAssessment: '系统中暂无绩优员工画像数据，请先配置人才画像以启用匹配功能。',
+      matchedProfileId: '',
+      matchedProfilePosition: '未配置',
+    };
+  }
 
   const skillMatch = calculateSkillProfileMatch(resume, targetProfile);
   const projectMatch = calculateProjectProfileMatch(resume, targetProfile);
@@ -650,10 +670,11 @@ function generatePotentialAssessment(
 
 export function evaluateResumeWithTalentMatch(
   resume: Resume,
-  jobPosition: JobPosition
+  jobPosition: JobPosition,
+  customProfiles?: HighPerformerProfile[]
 ): EvaluationResult {
   const baseEvaluation = analyzeResume(resume, jobPosition);
-  const talentProfileMatch = matchTalentProfile(resume, jobPosition);
+  const talentProfileMatch = matchTalentProfile(resume, jobPosition, customProfiles);
 
   const talentBonus = talentProfileMatch.overallConfidence >= 70 ? 5 : 0;
 

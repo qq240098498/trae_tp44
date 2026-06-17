@@ -7,6 +7,7 @@ import type {
   InterviewEvaluation,
   HiringRecommendation,
   ApiResponse,
+  HighPerformerProfile,
 } from '../../shared/types';
 
 const API_BASE = '/api';
@@ -164,5 +165,52 @@ export const api = {
       request<
         Array<{ key: string; label: string; description: string }>
       >('/bias/categories'),
+  },
+
+  talentProfiles: {
+    list: (params?: { department?: string; position?: string }) => {
+      const query = new URLSearchParams();
+      if (params?.department) query.set('department', params.department);
+      if (params?.position) query.set('position', params.position);
+      const queryStr = query.toString() ? `?${query.toString()}` : '';
+      return request<{ profiles: HighPerformerProfile[]; total: number }>(
+        `/talent-profiles${queryStr}`
+      );
+    },
+    get: (id: string) =>
+      request<HighPerformerProfile>(`/talent-profiles/${id}`),
+    create: (profile: Partial<HighPerformerProfile> & { id?: string }) =>
+      request<HighPerformerProfile>('/talent-profiles', {
+        method: 'POST',
+        body: JSON.stringify(profile),
+      }),
+    update: (id: string, updates: Partial<Omit<HighPerformerProfile, 'id'>>) =>
+      request<HighPerformerProfile>(`/talent-profiles/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updates),
+      }),
+    remove: (id: string) =>
+      request<{ deleted: boolean }>(`/talent-profiles/${id}`, {
+        method: 'DELETE',
+      }),
+    bulkCreate: (profiles: Array<Partial<HighPerformerProfile> & { id?: string }>) =>
+      request<{ profiles: HighPerformerProfile[]; count: number }>('/talent-profiles/bulk', {
+        method: 'POST',
+        body: JSON.stringify({ profiles }),
+      }),
+    bulkDelete: (ids: string[]) =>
+      request<{ deleted: number; total: number }>('/talent-profiles/bulk', {
+        method: 'DELETE',
+        body: JSON.stringify({ ids }),
+      }),
+    reset: () =>
+      request<{ reset: boolean; count: number }>('/talent-profiles/reset', {
+        method: 'POST',
+      }),
+    replace: (profiles: HighPerformerProfile[]) =>
+      request<{ profiles: HighPerformerProfile[]; count: number }>('/talent-profiles/replace', {
+        method: 'POST',
+        body: JSON.stringify({ profiles }),
+      }),
   },
 };
