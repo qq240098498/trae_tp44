@@ -21,7 +21,7 @@ import { useAppStore } from '../store';
 import { api } from '../utils/api';
 import ScoreBadge from '../components/ui/ScoreBadge';
 import { copyToClipboard, downloadFile } from '../utils/helpers';
-import { mockResumes } from '../../api/data/mockData';
+import { mockResumes } from '../data/mockData';
 
 const categoryConfig = {
   professional: {

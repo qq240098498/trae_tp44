@@ -20,7 +20,7 @@ import { api } from '../utils/api';
 import ScoreBadge from '../components/ui/ScoreBadge';
 import ProgressBar from '../components/ui/ProgressBar';
 import RadarChart from '../components/ui/RadarChart';
-import { mockResumes } from '../../api/data/mockData';
+import { mockResumes } from '../data/mockData';
 
 export default function ResumeScreening() {
   const {

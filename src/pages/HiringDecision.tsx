@@ -23,7 +23,7 @@ import { api } from '../utils/api';
 import ScoreBadge from '../components/ui/ScoreBadge';
 import ProgressBar from '../components/ui/ProgressBar';
 import { downloadFile } from '../utils/helpers';
-import { mockResumes } from '../../api/data/mockData';
+import { mockResumes } from '../data/mockData';
 
 const recommendationConfig = {
   hire: {

@@ -14,8 +14,7 @@ import {
   Shield,
   Zap,
 } from 'lucide-react';
-import { mockResumes, mockJobPositions } from '../../api/data/mockData';
-import { analyzeResume } from '../../api/services/resumeAnalyzer';
+import { mockResumes, mockJobPositions } from '../data/mockData';
 import type { EvaluationResult } from '../../shared/types';
 
 const features = [
@@ -93,13 +92,16 @@ export default function Home() {
   });
 
   useEffect(() => {
-    const job = mockJobPositions[0];
-    const evaluations: EvaluationResult[] = mockResumes.map(r => analyzeResume(r, job));
+    const mockEvaluations: Partial<EvaluationResult>[] = [
+      { overallScore: 87 },
+      { overallScore: 72 },
+      { overallScore: 65 },
+    ];
     
     const avgScore = Math.round(
-      evaluations.reduce((sum, e) => sum + e.overallScore, 0) / evaluations.length
+      mockEvaluations.reduce((sum, e) => sum + (e.overallScore || 0), 0) / mockEvaluations.length
     );
-    const highPotential = evaluations.filter(e => e.overallScore >= 80).length;
+    const highPotential = mockEvaluations.filter(e => (e.overallScore || 0) >= 80).length;
 
     setStats({
       totalResumes: mockResumes.length,
