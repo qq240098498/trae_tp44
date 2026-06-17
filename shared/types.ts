@@ -221,6 +221,54 @@ export interface EvaluationResult {
   evaluatedAt: Date;
 }
 
+export interface SalaryPercentile {
+  percentile: '25' | '50' | '75';
+  label: string;
+  minSalary: number;
+  maxSalary: number;
+  medianSalary: number;
+}
+
+export interface MarketDemandInfo {
+  level: 'low' | 'medium' | 'high' | 'extreme';
+  label: string;
+  description: string;
+  premiumRange: string;
+  color: string;
+}
+
+export interface SalaryBenchmarkSource {
+  name: string;
+  weight: number;
+  description: string;
+}
+
+export interface SalaryEstimation {
+  id: string;
+  jobPositionId: string;
+  jobTitle: string;
+  level: string;
+  location: string;
+  industry: string;
+  currency: string;
+  unit: string;
+  percentiles: SalaryPercentile[];
+  overallRange: {
+    min: number;
+    max: number;
+    median: number;
+  };
+  marketDemand: MarketDemandInfo;
+  benchmarks: SalaryBenchmarkSource[];
+  companyBandwidth: {
+    min: number;
+    max: number;
+    description: string;
+  };
+  negotiationTips: string[];
+  generatedAt: Date;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;

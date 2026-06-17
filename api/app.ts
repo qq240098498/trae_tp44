@@ -19,6 +19,7 @@ import interviewEvaluationRoutes from './routes/interviewEvaluation.js'
 import hiringDecisionRoutes from './routes/hiringDecision.js'
 import biasRoutes from './routes/bias.js'
 import talentProfileRoutes from './routes/talentProfile.js'
+import salaryRoutes from './routes/salary.js'
 
 // for esm mode
 const __filename = fileURLToPath(import.meta.url)
@@ -44,6 +45,7 @@ app.use('/api/interview-evaluation', interviewEvaluationRoutes)
 app.use('/api/hiring-decision', hiringDecisionRoutes)
 app.use('/api/bias', biasRoutes)
 app.use('/api/talent-profiles', talentProfileRoutes)
+app.use('/api/salary', salaryRoutes)
 
 /**
  * health

@@ -9,6 +9,7 @@ import type {
   JobDescriptionForm,
   HighPerformerProfile,
   ResumeAnalysisResult,
+  SalaryEstimation,
 } from '../../shared/types';
 import { api } from '../utils/api';
 
@@ -60,6 +61,10 @@ interface AppState {
   updateTalentProfile: (id: string, updates: Partial<Omit<HighPerformerProfile, 'id'>>) => void;
   removeTalentProfile: (id: string) => void;
   loadTalentProfiles: (params?: { department?: string; position?: string }) => Promise<void>;
+
+  salaryEstimation: SalaryEstimation | null;
+  setSalaryEstimation: (estimation: SalaryEstimation | null) => void;
+  generateSalaryEstimation: (jobPositionId: string, options?: { location?: string; industry?: string }) => Promise<void>;
 
   resetState: () => void;
 }
@@ -134,6 +139,19 @@ export const useAppStore = create<AppState>((set) => ({
     }
   },
 
+  salaryEstimation: null,
+  setSalaryEstimation: (estimation) => set({ salaryEstimation: estimation }),
+  generateSalaryEstimation: async (jobPositionId, options) => {
+    set({ loading: true });
+    try {
+      const result = await api.salary.estimate(jobPositionId, options);
+      set({ salaryEstimation: result, loading: false });
+    } catch (error) {
+      console.error('生成薪酬估算失败:', error);
+      set({ loading: false });
+    }
+  },
+
   resetState: () =>
     set({
       currentEvaluation: null,
@@ -143,5 +161,6 @@ export const useAppStore = create<AppState>((set) => ({
       basicInfoQuestions: [],
       currentInterviewEvaluation: null,
       hiringRecommendation: null,
+      salaryEstimation: null,
     }),
 }));

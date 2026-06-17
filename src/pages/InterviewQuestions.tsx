@@ -15,8 +15,16 @@ import {
   Send,
   Star,
   BookOpen,
+  DollarSign,
+  TrendingUp,
+  MapPin,
+  Building2,
+  BarChart3,
+  Shield,
+  Sparkles,
+  Info,
 } from 'lucide-react';
-import type { InterviewQuestion, JobPosition, Resume } from '../../shared/types';
+import type { InterviewQuestion, JobPosition, Resume, SalaryEstimation } from '../../shared/types';
 import { useAppStore } from '../store';
 import { api } from '../utils/api';
 import ScoreBadge from '../components/ui/ScoreBadge';
@@ -72,6 +80,21 @@ const difficultyConfig = {
   hard: { label: '困难', color: 'bg-red-100 text-red-700' },
 };
 
+const cityOptions = [
+  '北京', '上海', '深圳', '广州', '杭州', '成都', '武汉', '南京', '苏州', '西安', '重庆', '天津',
+];
+
+const industryOptions = [
+  '互联网', '人工智能', '金融科技', '游戏', '电商', 'SaaS/企业服务', '教育科技', '医疗健康', '制造业', '传统行业',
+];
+
+const formatSalary = (num: number): string => {
+  if (num >= 10000) {
+    return `${(num / 1000).toFixed(0)}K`;
+  }
+  return num.toLocaleString();
+};
+
 export default function InterviewQuestions() {
   const {
     currentJobPosition,
@@ -83,6 +106,9 @@ export default function InterviewQuestions() {
     loading,
     resumes,
     setResumes,
+    salaryEstimation,
+    setSalaryEstimation,
+    generateSalaryEstimation,
   } = useAppStore();
 
   const [activeCategory, setActiveCategory] = useState<'all' | 'basicInfo' | 'professional' | 'softSkill' | 'culturalFit' | 'followUp'>('all');
@@ -96,6 +122,9 @@ export default function InterviewQuestions() {
     coveredPoints: string[];
     missingPoints: string[];
   }>>({});
+  const [salaryLocation, setSalaryLocation] = useState<string>('北京');
+  const [salaryIndustry, setSalaryIndustry] = useState<string>('互联网');
+  const [showSalarySection, setShowSalarySection] = useState<boolean>(false);
 
   useEffect(() => {
     setResumes(mockResumes);
@@ -159,6 +188,15 @@ export default function InterviewQuestions() {
       return `【${config.label}】${q.question}\n\n考察要点：\n${q.expectedPoints.map(p => `• ${p}`).join('\n')}\n\n`;
     }).join('\n---\n\n');
     downloadFile(content, '面试问题列表.md', 'text/markdown');
+  };
+
+  const handleGenerateSalaryEstimation = async () => {
+    if (!currentJobPosition) return;
+    await generateSalaryEstimation(currentJobPosition.id, {
+      location: salaryLocation,
+      industry: salaryIndustry,
+    });
+    setShowSalarySection(true);
   };
 
   const filteredQuestions = activeCategory === 'all'
@@ -309,9 +347,247 @@ export default function InterviewQuestions() {
               </div>
             </div>
           )}
+
+          <div className="card p-6 bg-gradient-to-br from-amber-50 to-orange-50">
+            <h3 className="font-bold text-amber-900 mb-4 flex items-center gap-2">
+              <DollarSign size={18} className="text-amber-600" />
+              薪酬区间估算
+            </h3>
+            <p className="text-sm text-amber-800 mb-4">
+              结合岗位级别、城市、行业和市场数据，为您提供科学的薪酬参考
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-amber-900 mb-2 flex items-center gap-1">
+                  <MapPin size={14} />
+                  工作城市
+                </label>
+                <select
+                  value={salaryLocation}
+                  onChange={(e) => setSalaryLocation(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                >
+                  {cityOptions.map((city) => (
+                    <option key={city} value={city}>{city}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-amber-900 mb-2 flex items-center gap-1">
+                  <Building2 size={14} />
+                  所属行业
+                </label>
+                <select
+                  value={salaryIndustry}
+                  onChange={(e) => setSalaryIndustry(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                >
+                  {industryOptions.map((industry) => (
+                    <option key={industry} value={industry}>{industry}</option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                onClick={handleGenerateSalaryEstimation}
+                disabled={loading || !currentJobPosition}
+                className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <RefreshCw size={18} className="animate-spin" />
+                ) : (
+                  <TrendingUp size={18} />
+                )}
+                {loading ? '计算中...' : '生成薪酬建议'}
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="lg:col-span-8 space-y-6">
+          {showSalarySection && salaryEstimation && (
+            <div className="card p-6 animate-fade-in bg-gradient-to-br from-slate-50 via-amber-50 to-orange-50 border-2 border-amber-100">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                    <DollarSign size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-slate-900">薪酬区间估算</h2>
+                    <p className="text-sm text-slate-600 flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin size={12} />
+                        {salaryEstimation.location}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <Building2 size={12} />
+                        {salaryEstimation.industry}
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <BarChart3 size={12} />
+                        {salaryEstimation.level}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+                <div className={`px-4 py-2 rounded-xl text-white font-semibold bg-gradient-to-r ${salaryEstimation.marketDemand.color} shadow-md`}>
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={16} />
+                    <span>{salaryEstimation.marketDemand.label}</span>
+                    <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                      溢价 {salaryEstimation.marketDemand.premiumRange}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4 mb-6">
+                {salaryEstimation.percentiles.map((p, idx) => {
+                  const colors = [
+                    { bg: 'from-slate-400 to-slate-500', bar: 'bg-slate-400', text: 'text-slate-700' },
+                    { bg: 'from-blue-500 to-blue-600', bar: 'bg-blue-500', text: 'text-blue-700' },
+                    { bg: 'from-emerald-500 to-teal-600', bar: 'bg-emerald-500', text: 'text-emerald-700' },
+                  ];
+                  const color = colors[idx];
+                  return (
+                    <div key={p.percentile} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                      <div className={`w-full h-1.5 rounded-full bg-gradient-to-r ${color.bg} mb-4`} />
+                      <div className={`text-sm font-semibold ${color.text} mb-2 flex items-center gap-1`}>
+                        <Info size={14} />
+                        {p.label}
+                      </div>
+                      <div className="text-3xl font-bold text-slate-900 mb-1">
+                        {formatSalary(p.medianSalary)}
+                        <span className="text-sm font-normal text-slate-500 ml-1">
+                          {salaryEstimation.unit}
+                        </span>
+                      </div>
+                      <div className="text-xs text-slate-500">
+                        范围 {formatSalary(p.minSalary)} - {formatSalary(p.maxSalary)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="bg-white rounded-xl p-5 mb-6 border border-slate-100">
+                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <TrendingUp size={18} className="text-amber-600" />
+                  整体薪酬分布
+                </h3>
+                <div className="relative">
+                  <div className="flex items-end gap-3 h-32">
+                    {(() => {
+                      const min = salaryEstimation.overallRange.min;
+                      const max = salaryEstimation.overallRange.max;
+                      const range = max - min;
+                      const heights = salaryEstimation.percentiles.map((p) => {
+                        return ((p.medianSalary - min) / range) * 85 + 15;
+                      });
+                      return salaryEstimation.percentiles.map((p, idx) => {
+                        const colors = ['bg-slate-400', 'bg-blue-500', 'bg-emerald-500'];
+                        return (
+                          <div key={p.percentile} className="flex-1 flex flex-col items-center justify-end gap-2">
+                            <div className="text-xs font-bold text-slate-700">
+                              {formatSalary(p.medianSalary)}
+                            </div>
+                            <div
+                              className={`w-full rounded-t-lg ${colors[idx]} transition-all hover:opacity-80`}
+                              style={{ height: `${heights[idx]}%` }}
+                            />
+                            <div className="text-xs text-slate-500 font-medium">
+                              P{p.percentile}
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                  <div className="absolute left-0 bottom-0 w-full h-0.5 bg-slate-200" />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4 mb-6">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
+                  <h3 className="font-bold text-blue-900 mb-3 flex items-center gap-2">
+                    <Shield size={18} />
+                    公司薪酬带宽
+                  </h3>
+                  <div className="text-2xl font-bold text-blue-700 mb-2">
+                    {formatSalary(salaryEstimation.companyBandwidth.min)} - {formatSalary(salaryEstimation.companyBandwidth.max)}
+                    <span className="text-sm font-normal ml-1">{salaryEstimation.unit}</span>
+                  </div>
+                  <p className="text-sm text-blue-800 leading-relaxed">
+                    {salaryEstimation.companyBandwidth.description}
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-5 border border-rose-100">
+                  <h3 className="font-bold text-rose-900 mb-3 flex items-center gap-2">
+                    <Sparkles size={18} />
+                    市场紧缺度分析
+                  </h3>
+                  <div className="text-lg font-bold text-rose-700 mb-2">
+                    {salaryEstimation.marketDemand.label}
+                    <span className="ml-2 text-sm bg-rose-200 text-rose-800 px-2 py-0.5 rounded-full">
+                      溢价 {salaryEstimation.marketDemand.premiumRange}
+                    </span>
+                  </div>
+                  <p className="text-sm text-rose-800 leading-relaxed">
+                    {salaryEstimation.marketDemand.description}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-5 mb-6 border border-slate-100">
+                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <BarChart3 size={18} className="text-slate-600" />
+                  数据来源说明（加权综合）
+                </h3>
+                <div className="space-y-3">
+                  {salaryEstimation.benchmarks.map((bench, idx) => (
+                    <div key={idx} className="flex items-center gap-4">
+                      <div className="w-40 text-sm font-medium text-slate-700 truncate">
+                        {bench.name}
+                      </div>
+                      <div className="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all"
+                          style={{ width: `${bench.weight * 100}%` }}
+                        />
+                      </div>
+                      <div className="w-16 text-right text-sm font-bold text-orange-600">
+                        {(bench.weight * 100).toFixed(0)}%
+                      </div>
+                      <div className="hidden lg:block w-64 text-xs text-slate-500 truncate" title={bench.description}>
+                        {bench.description}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-5 border border-violet-100">
+                <h3 className="font-bold text-violet-900 mb-4 flex items-center gap-2">
+                  <Lightbulb size={18} className="text-violet-600" />
+                  谈薪策略建议
+                </h3>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {salaryEstimation.negotiationTips.map((tip, idx) => (
+                    <div key={idx} className="flex items-start gap-3 p-3 bg-white/70 rounded-lg hover:bg-white transition-colors">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                        {idx + 1}
+                      </div>
+                      <p className="text-sm text-violet-900 leading-relaxed">{tip}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {interviewQuestions.length > 0 && (
             <>
               <div className="flex items-center justify-between">

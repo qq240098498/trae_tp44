@@ -8,6 +8,7 @@ import type {
   HiringRecommendation,
   HighPerformerProfile,
   ResumeAnalysisResult,
+  SalaryEstimation,
 } from '../../shared/types';
 
 const API_BASE = '/api';
@@ -231,6 +232,14 @@ export const api = {
       request<{ profiles: HighPerformerProfile[]; count: number }>('/talent-profiles/replace', {
         method: 'POST',
         body: JSON.stringify({ profiles }),
+      }),
+  },
+
+  salary: {
+    estimate: (jobPositionId: string, options?: { location?: string; industry?: string }) =>
+      request<SalaryEstimation>('/salary/estimate', {
+        method: 'POST',
+        body: JSON.stringify({ jobPositionId, ...options }),
       }),
   },
 };
