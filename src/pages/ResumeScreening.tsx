@@ -14,12 +14,13 @@ import {
   ChevronRight,
   Eye,
 } from 'lucide-react';
-import type { Resume, EvaluationResult, JobPosition } from '../../shared/types';
+import type { Resume } from '../../shared/types';
 import { useAppStore } from '../store';
 import { api } from '../utils/api';
 import ScoreBadge from '../components/ui/ScoreBadge';
 import ProgressBar from '../components/ui/ProgressBar';
 import RadarChart from '../components/ui/RadarChart';
+import TalentProfileMatch from '../components/ui/TalentProfileMatch';
 import { mockResumes } from '../data/mockData';
 
 export default function ResumeScreening() {
@@ -100,6 +101,9 @@ export default function ResumeScreening() {
     { subject: '技能匹配', score: currentEvaluation.skillMatch.score },
     { subject: '经验相关', score: currentEvaluation.experienceRelevance.score },
     { subject: '发展潜力', score: currentEvaluation.potential.score },
+    ...(currentEvaluation.talentProfileMatch ? [
+      { subject: '人才画像', score: currentEvaluation.talentProfileMatch.overallConfidence },
+    ] : []),
   ] : [];
 
   return (
@@ -405,6 +409,10 @@ export default function ResumeScreening() {
                         ))}
                       </div>
                     </div>
+                  )}
+
+                  {currentEvaluation.talentProfileMatch && (
+                    <TalentProfileMatch data={currentEvaluation.talentProfileMatch} />
                   )}
                 </div>
               )}

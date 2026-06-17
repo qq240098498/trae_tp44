@@ -1,4 +1,4 @@
-import type { JobPosition, Resume, InterviewQuestion } from '../../shared/types';
+import type { JobPosition, Resume, InterviewQuestion, HighPerformerProfile } from '../../shared/types';
 
 export const mockJobPositions: JobPosition[] = [
   {
@@ -281,5 +281,41 @@ export const culturalFitQuestions: Omit<InterviewQuestion, 'id'>[] = [
     question: '请描述你职业生涯中最有成就感的一件事，并说明原因。',
     expectedPoints: ['成就动机', '价值观', '自我认知', '成长轨迹'],
     difficulty: 'easy'
+  }
+];
+
+export const highPerformerProfiles: HighPerformerProfile[] = [
+  {
+    id: 'perf-001',
+    position: '高级前端工程师',
+    level: 'senior',
+    department: '技术部',
+    coreSkills: ['React', 'TypeScript', 'Vue', 'Node.js', 'Webpack', '性能优化', '架构设计'],
+    keyStrengths: ['技术领导力', '问题解决能力', '跨团队协作', '持续学习', '代码质量把控'],
+    careerTrajectory: ['初级工程师', '中级工程师', '高级工程师', '技术负责人'],
+    projectTypes: ['电商平台', 'SaaS系统', '微前端架构', '性能优化', '组件库建设'],
+    performanceLevel: 'top'
+  },
+  {
+    id: 'perf-002',
+    position: '前端技术专家',
+    level: 'expert',
+    department: '技术部',
+    coreSkills: ['React', 'TypeScript', '低代码', '工程化', '架构设计', '微前端', 'Node.js'],
+    keyStrengths: ['技术创新', '架构设计能力', '团队培养', '复杂问题拆解', '跨部门协作'],
+    careerTrajectory: ['工程师', '高级工程师', '技术专家', '技术负责人'],
+    projectTypes: ['低代码平台', '中台系统', '技术基础设施', '开源贡献', '技术规范制定'],
+    performanceLevel: 'top'
+  },
+  {
+    id: 'perf-003',
+    position: '前端开发工程师',
+    level: 'mid',
+    department: '技术部',
+    coreSkills: ['React', 'TypeScript', 'Vue', 'JavaScript', 'CSS', 'HTML5'],
+    keyStrengths: ['快速学习', '执行力强', '团队协作', '代码质量', '主动承担'],
+    careerTrajectory: ['初级工程师', '中级工程师', '核心开发'],
+    projectTypes: ['业务系统', '中后台管理', '移动端H5', '小程序开发'],
+    performanceLevel: 'excellent'
   }
 ];

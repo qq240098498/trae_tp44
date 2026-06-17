@@ -1,8 +1,9 @@
 import { Router, Request, Response } from 'express';
 import type { ApiResponse, Resume, EvaluationResult } from '../../shared/types';
 import { mockResumes, mockJobPositions } from '../data/mockData';
-import { analyzeResume, parseResumeText } from '../services/resumeAnalyzer';
+import { parseResumeText } from '../services/resumeAnalyzer';
 import { maskSensitiveInformation } from '../services/biasDetection';
+import { evaluateResumeWithTalentMatch } from '../services/evaluationEngine';
 
 const router = Router();
 
@@ -121,7 +122,7 @@ router.post('/evaluate', (req: Request, res: Response) => {
       return res.status(404).json(response);
     }
 
-    const evaluationResult = analyzeResume(resume, jobPosition);
+    const evaluationResult = evaluateResumeWithTalentMatch(resume, jobPosition);
 
     const response: ApiResponse<EvaluationResult> = {
       success: true,
@@ -165,7 +166,7 @@ router.post('/batch-evaluate', (req: Request, res: Response) => {
       if (!resume) return null;
       return {
         resumeId,
-        evaluation: analyzeResume(resume, jobPosition),
+        evaluation: evaluateResumeWithTalentMatch(resume, jobPosition),
       };
     }).filter(Boolean);
 

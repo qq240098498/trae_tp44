@@ -72,25 +72,6 @@ export interface BiasCheckResult {
   isFair: boolean;
 }
 
-export interface EvaluationResult {
-  resumeId: string;
-  skillMatch: {
-    score: number;
-    details: SkillMatchDetail[];
-  };
-  experienceRelevance: {
-    score: number;
-    details: ExperienceDetail[];
-  };
-  potential: {
-    score: number;
-    details: PotentialDetail[];
-  };
-  overallScore: number;
-  biasCheck: BiasCheckResult;
-  evaluatedAt: Date;
-}
-
 export interface InterviewQuestion {
   id: string;
   category: 'professional' | 'softSkill' | 'culturalFit';
@@ -133,6 +114,73 @@ export interface JobDescriptionForm {
   teamSize?: string;
   location?: string;
   salaryRange?: string;
+}
+
+export interface HighPerformerProfile {
+  id: string;
+  position: string;
+  level: string;
+  department: string;
+  coreSkills: string[];
+  keyStrengths: string[];
+  careerTrajectory: string[];
+  projectTypes: string[];
+  performanceLevel: 'top' | 'excellent' | 'good';
+}
+
+export interface FitPoint {
+  category: 'skill' | 'project' | 'career' | 'strength';
+  description: string;
+  confidence: number;
+  evidence: string;
+}
+
+export interface TalentProfileMatchResult {
+  overallConfidence: number;
+  skillMatch: {
+    score: number;
+    matchedSkills: string[];
+    details: string;
+  };
+  projectMatch: {
+    score: number;
+    matchedProjectTypes: string[];
+    details: string;
+  };
+  careerMatch: {
+    score: number;
+    matchedTrajectory: string[];
+    details: string;
+  };
+  strengthMatch: {
+    score: number;
+    matchedStrengths: string[];
+    details: string;
+  };
+  keyFitPoints: FitPoint[];
+  potentialAssessment: string;
+  matchedProfileId: string;
+  matchedProfilePosition: string;
+}
+
+export interface EvaluationResult {
+  resumeId: string;
+  skillMatch: {
+    score: number;
+    details: SkillMatchDetail[];
+  };
+  experienceRelevance: {
+    score: number;
+    details: ExperienceDetail[];
+  };
+  potential: {
+    score: number;
+    details: PotentialDetail[];
+  };
+  talentProfileMatch?: TalentProfileMatchResult;
+  overallScore: number;
+  biasCheck: BiasCheckResult;
+  evaluatedAt: Date;
 }
 
 export interface ApiResponse<T> {
