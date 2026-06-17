@@ -3,6 +3,8 @@ import type {
   SalaryPercentile,
   MarketDemandInfo,
   SalaryBenchmarkSource,
+  SalaryBreakdown,
+  CompensationPackage,
 } from '../../shared/types';
 import { mockJobPositions } from '../data/mockData';
 
@@ -36,6 +38,82 @@ const levelBaseSalary: Record<string, { base25: number; base50: number; base75: 
   lead: { base25: 35000, base50: 48000, base75: 60000 },
   manager: { base25: 45000, base50: 60000, base75: 80000 },
   director: { base25: 60000, base50: 85000, base75: 120000 },
+};
+
+interface CompensationStructure {
+  baseRatio: number;
+  performanceBonusMonths: { min: number; median: number; max: number };
+  yearEndBonusMonths: { min: number; median: number; max: number };
+  stockAnnualRatio: number;
+  allowancesMonthly: number;
+  benefitsAnnualValue: number;
+}
+
+const compensationByLevel: Record<string, CompensationStructure> = {
+  entry: {
+    baseRatio: 0.9,
+    performanceBonusMonths: { min: 0, median: 1, max: 1.5 },
+    yearEndBonusMonths: { min: 1, median: 2, max: 2 },
+    stockAnnualRatio: 0,
+    allowancesMonthly: 1000,
+    benefitsAnnualValue: 8000,
+  },
+  junior: {
+    baseRatio: 0.88,
+    performanceBonusMonths: { min: 0.5, median: 1.5, max: 2 },
+    yearEndBonusMonths: { min: 1.5, median: 2.5, max: 3 },
+    stockAnnualRatio: 0,
+    allowancesMonthly: 1500,
+    benefitsAnnualValue: 12000,
+  },
+  mid: {
+    baseRatio: 0.85,
+    performanceBonusMonths: { min: 1, median: 2, max: 3 },
+    yearEndBonusMonths: { min: 2, median: 3, max: 4 },
+    stockAnnualRatio: 0.05,
+    allowancesMonthly: 2000,
+    benefitsAnnualValue: 18000,
+  },
+  senior: {
+    baseRatio: 0.8,
+    performanceBonusMonths: { min: 1.5, median: 2, max: 3.5 },
+    yearEndBonusMonths: { min: 3, median: 4, max: 5 },
+    stockAnnualRatio: 0.15,
+    allowancesMonthly: 3000,
+    benefitsAnnualValue: 28000,
+  },
+  expert: {
+    baseRatio: 0.75,
+    performanceBonusMonths: { min: 2, median: 2.5, max: 4 },
+    yearEndBonusMonths: { min: 4, median: 5, max: 6 },
+    stockAnnualRatio: 0.28,
+    allowancesMonthly: 4500,
+    benefitsAnnualValue: 45000,
+  },
+  lead: {
+    baseRatio: 0.75,
+    performanceBonusMonths: { min: 2, median: 3, max: 4 },
+    yearEndBonusMonths: { min: 3.5, median: 5, max: 6 },
+    stockAnnualRatio: 0.25,
+    allowancesMonthly: 4000,
+    benefitsAnnualValue: 40000,
+  },
+  manager: {
+    baseRatio: 0.72,
+    performanceBonusMonths: { min: 2.5, median: 3, max: 5 },
+    yearEndBonusMonths: { min: 4, median: 5.5, max: 7 },
+    stockAnnualRatio: 0.32,
+    allowancesMonthly: 5000,
+    benefitsAnnualValue: 55000,
+  },
+  director: {
+    baseRatio: 0.68,
+    performanceBonusMonths: { min: 3, median: 4, max: 6 },
+    yearEndBonusMonths: { min: 5, median: 7, max: 10 },
+    stockAnnualRatio: 0.45,
+    allowancesMonthly: 8000,
+    benefitsAnnualValue: 80000,
+  },
 };
 
 const industryPremium: Record<string, number> = {
@@ -143,6 +221,20 @@ function getLevelBase(level: string) {
   );
 }
 
+function getCompensationStructure(level: string): CompensationStructure {
+  const normalizedLevel = level.toLowerCase();
+  return (
+    compensationByLevel[normalizedLevel] || {
+      baseRatio: 0.8,
+      performanceBonusMonths: { min: 1, median: 2, max: 3 },
+      yearEndBonusMonths: { min: 2, median: 3, max: 4 },
+      stockAnnualRatio: 0.1,
+      allowancesMonthly: 2000,
+      benefitsAnnualValue: 20000,
+    }
+  );
+}
+
 function determineMarketDemand(skills: string[], jobTitle: string): MarketDemandInfo {
   const allText = [...skills, jobTitle].join(' ').toLowerCase();
   const priorityOrder = ['TypeScript', 'React', 'Node.js', 'Vue', '前端'];
@@ -154,6 +246,75 @@ function determineMarketDemand(skills: string[], jobTitle: string): MarketDemand
   }
 
   return marketDemandData['default'];
+}
+
+function calculateBreakdown(
+  baseSalary: number,
+  compStructure: CompensationStructure,
+  bonusType: 'min' | 'median' | 'max'
+): { breakdown: SalaryBreakdown; monthlyCash: number; annualCash: number; annualTotalPackage: number } {
+  const perfBonusMonths = compStructure.performanceBonusMonths[bonusType];
+  const yearEndBonusMonths = compStructure.yearEndBonusMonths[bonusType];
+
+  const performanceBonus = (baseSalary * perfBonusMonths) / 12;
+  const yearEndBonus = (baseSalary * yearEndBonusMonths) / 12;
+  const monthlyAllowances = compStructure.allowancesMonthly;
+  const monthlyBenefits = compStructure.benefitsAnnualValue / 12;
+
+  const cashWithoutStock = baseSalary + performanceBonus + yearEndBonus + monthlyAllowances;
+  const stockMonthly = (cashWithoutStock * 12 * compStructure.stockAnnualRatio) / 12;
+
+  const breakdown: SalaryBreakdown = {
+    baseSalary,
+    performanceBonus,
+    yearEndBonus,
+    stockOptions: stockMonthly,
+    allowances: monthlyAllowances,
+    benefitsValue: monthlyBenefits,
+  };
+
+  const monthlyCash = baseSalary + performanceBonus + yearEndBonus + monthlyAllowances;
+  const annualCash = monthlyCash * 12;
+  const annualTotalPackage = monthlyCash * 12 + stockMonthly * 12 + compStructure.benefitsAnnualValue;
+
+  return { breakdown, monthlyCash, annualCash, annualTotalPackage };
+}
+
+const roundTo500 = (n: number) => Math.round(n / 500) * 500;
+const roundTo1000 = (n: number) => Math.round(n / 1000) * 1000;
+
+function buildCompensationPackage(breakdown: SalaryBreakdown): CompensationPackage[] {
+  const annualBase = breakdown.baseSalary * 12;
+  const annualPerf = breakdown.performanceBonus * 12;
+  const annualYearEnd = breakdown.yearEndBonus * 12;
+  const annualStock = breakdown.stockOptions * 12;
+  const annualAllowance = breakdown.allowances * 12;
+  const annualBenefits = breakdown.benefitsValue * 12;
+  const totalAnnual = annualBase + annualPerf + annualYearEnd + annualStock + annualAllowance + annualBenefits;
+
+  const pkg = (
+    name: string,
+    monthly: number,
+    annual: number,
+    description: string,
+    icon: string
+  ): CompensationPackage => ({
+    name,
+    monthlyAmount: roundTo500(monthly),
+    annualAmount: roundTo1000(annual),
+    percentage: totalAnnual > 0 ? Math.round((annual / totalAnnual) * 100) : 0,
+    description,
+    icon,
+  });
+
+  return [
+    pkg('基本工资', breakdown.baseSalary, annualBase, '固定月度发放，占薪酬的主要部分', '💰'),
+    pkg('绩效奖金', breakdown.performanceBonus, annualPerf, '根据KPI/OKR考核发放，通常按月度或季度评估', '📊'),
+    pkg('年终奖', breakdown.yearEndBonus, annualYearEnd, '年底根据公司业绩和个人表现发放，通常1-6个月', '🎯'),
+    pkg('股票期权', breakdown.stockOptions, annualStock, '限制性股票单位(RSU)或期权，按归属期折算年化价值', '📈'),
+    pkg('各项补贴', breakdown.allowances, annualAllowance, '交通、餐饮、通讯、住房、差旅等现金补贴', '🎁'),
+    pkg('福利折算', breakdown.benefitsValue, annualBenefits, '五险一金补充、商业保险、带薪假期、体检、团建等福利折算', '✨'),
+  ];
 }
 
 export function generateSalaryEstimation(
@@ -171,35 +332,75 @@ export function generateSalaryEstimation(
   );
 
   const levelBase = getLevelBase(jobPosition.level);
+  const compStructure = getCompensationStructure(jobPosition.level);
 
   const raw25 = levelBase.base25 * locationCoef * industryCoef;
   const raw50 = levelBase.base50 * locationCoef * industryCoef;
   const raw75 = levelBase.base75 * locationCoef * industryCoef;
 
-  const roundTo500 = (n: number) => Math.round(n / 500) * 500;
+  const base25 = roundTo500(raw25);
+  const base50 = roundTo500(raw50);
+  const base75 = roundTo500(raw75);
+
+  const calc25 = calculateBreakdown(roundTo500(base25 * (1 / compStructure.baseRatio)), compStructure, 'min');
+  const calc50 = calculateBreakdown(roundTo500(base50 * (1 / compStructure.baseRatio)), compStructure, 'median');
+  const calc75 = calculateBreakdown(roundTo500(base75 * (1 / compStructure.baseRatio)), compStructure, 'max');
 
   const p25: SalaryPercentile = {
     percentile: '25',
     label: '25分位（保守）',
-    minSalary: roundTo500(raw25 * 0.92),
-    maxSalary: roundTo500(raw25 * 1.05),
-    medianSalary: roundTo500(raw25),
+    minSalary: roundTo500(base25 * 0.92),
+    maxSalary: roundTo500(base25 * 1.05),
+    medianSalary: base25,
+    monthlyCash: roundTo500(calc25.monthlyCash),
+    annualCash: roundTo1000(calc25.annualCash),
+    annualTotalPackage: roundTo1000(calc25.annualTotalPackage),
+    breakdown: {
+      baseSalary: roundTo500(calc25.breakdown.baseSalary),
+      performanceBonus: roundTo500(calc25.breakdown.performanceBonus),
+      yearEndBonus: roundTo500(calc25.breakdown.yearEndBonus),
+      stockOptions: roundTo500(calc25.breakdown.stockOptions),
+      allowances: roundTo500(calc25.breakdown.allowances),
+      benefitsValue: roundTo500(calc25.breakdown.benefitsValue),
+    },
   };
 
   const p50: SalaryPercentile = {
     percentile: '50',
     label: '50分位（中位）',
-    minSalary: roundTo500(raw50 * 0.94),
-    maxSalary: roundTo500(raw50 * 1.06),
-    medianSalary: roundTo500(raw50),
+    minSalary: roundTo500(base50 * 0.94),
+    maxSalary: roundTo500(base50 * 1.06),
+    medianSalary: base50,
+    monthlyCash: roundTo500(calc50.monthlyCash),
+    annualCash: roundTo1000(calc50.annualCash),
+    annualTotalPackage: roundTo1000(calc50.annualTotalPackage),
+    breakdown: {
+      baseSalary: roundTo500(calc50.breakdown.baseSalary),
+      performanceBonus: roundTo500(calc50.breakdown.performanceBonus),
+      yearEndBonus: roundTo500(calc50.breakdown.yearEndBonus),
+      stockOptions: roundTo500(calc50.breakdown.stockOptions),
+      allowances: roundTo500(calc50.breakdown.allowances),
+      benefitsValue: roundTo500(calc50.breakdown.benefitsValue),
+    },
   };
 
   const p75: SalaryPercentile = {
     percentile: '75',
     label: '75分位（竞争力）',
-    minSalary: roundTo500(raw75 * 0.95),
-    maxSalary: roundTo500(raw75 * 1.1),
-    medianSalary: roundTo500(raw75),
+    minSalary: roundTo500(base75 * 0.95),
+    maxSalary: roundTo500(base75 * 1.1),
+    medianSalary: base75,
+    monthlyCash: roundTo500(calc75.monthlyCash),
+    annualCash: roundTo1000(calc75.annualCash),
+    annualTotalPackage: roundTo1000(calc75.annualTotalPackage),
+    breakdown: {
+      baseSalary: roundTo500(calc75.breakdown.baseSalary),
+      performanceBonus: roundTo500(calc75.breakdown.performanceBonus),
+      yearEndBonus: roundTo500(calc75.breakdown.yearEndBonus),
+      stockOptions: roundTo500(calc75.breakdown.stockOptions),
+      allowances: roundTo500(calc75.breakdown.allowances),
+      benefitsValue: roundTo500(calc75.breakdown.benefitsValue),
+    },
   };
 
   const marketDemand = determineMarketDemand(jobPosition.skills, jobPosition.title);
@@ -231,12 +432,18 @@ export function generateSalaryEstimation(
       min: p25.minSalary,
       max: p75.maxSalary,
       median: p50.medianSalary,
+      medianMonthlyCash: p50.monthlyCash,
+      medianAnnualCash: p50.annualCash,
+      medianTotalPackage: p50.annualTotalPackage,
     },
+    medianPackage: buildCompensationPackage(p50.breakdown),
     marketDemand,
     benchmarks: benchmarkSources,
     companyBandwidth: {
       min: roundTo500(p25.minSalary * 0.95),
       max: roundTo500(p75.maxSalary * 1.15),
+      minTotalPackage: roundTo1000(p25.annualTotalPackage * 0.92),
+      maxTotalPackage: roundTo1000(p75.annualTotalPackage * 1.2),
       description:
         '公司薪酬带宽覆盖从保守到极具竞争力的全范围区间，保留了根据候选人特殊情况进行灵活调整的空间',
     },

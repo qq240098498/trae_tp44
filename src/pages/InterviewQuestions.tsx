@@ -446,66 +446,187 @@ export default function InterviewQuestions() {
               <div className="grid md:grid-cols-3 gap-4 mb-6">
                 {salaryEstimation.percentiles.map((p, idx) => {
                   const colors = [
-                    { bg: 'from-slate-400 to-slate-500', bar: 'bg-slate-400', text: 'text-slate-700' },
-                    { bg: 'from-blue-500 to-blue-600', bar: 'bg-blue-500', text: 'text-blue-700' },
-                    { bg: 'from-emerald-500 to-teal-600', bar: 'bg-emerald-500', text: 'text-emerald-700' },
+                    { bg: 'from-slate-400 to-slate-500', bar: 'bg-slate-400', text: 'text-slate-700', badge: 'bg-slate-100 text-slate-700' },
+                    { bg: 'from-blue-500 to-blue-600', bar: 'bg-blue-500', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-700' },
+                    { bg: 'from-emerald-500 to-teal-600', bar: 'bg-emerald-500', text: 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-700' },
                   ];
                   const color = colors[idx];
                   return (
                     <div key={p.percentile} className="bg-white rounded-xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
                       <div className={`w-full h-1.5 rounded-full bg-gradient-to-r ${color.bg} mb-4`} />
-                      <div className={`text-sm font-semibold ${color.text} mb-2 flex items-center gap-1`}>
+                      <div className={`text-sm font-semibold ${color.text} mb-3 flex items-center gap-1`}>
                         <Info size={14} />
                         {p.label}
                       </div>
-                      <div className="text-3xl font-bold text-slate-900 mb-1">
+                      <div className="text-2xl font-bold text-slate-900 mb-1">
                         {formatSalary(p.medianSalary)}
                         <span className="text-sm font-normal text-slate-500 ml-1">
                           {salaryEstimation.unit}
                         </span>
                       </div>
-                      <div className="text-xs text-slate-500">
-                        范围 {formatSalary(p.minSalary)} - {formatSalary(p.maxSalary)}
+                      <div className="text-xs text-slate-500 mb-3">
+                        基本薪资范围 {formatSalary(p.minSalary)} - {formatSalary(p.maxSalary)}
+                      </div>
+                      <div className="space-y-2 pt-3 border-t border-slate-100">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-slate-500">月度现金收入</span>
+                          <span className={`font-bold px-2 py-0.5 rounded-full ${color.badge}`}>
+                            {formatSalary(p.monthlyCash)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-slate-500">年度现金</span>
+                          <span className="font-bold text-slate-700">
+                            {formatSalary(p.annualCash)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-slate-500">年度总包(Total)</span>
+                          <span className={`font-bold ${color.text}`}>
+                            {formatSalary(p.annualTotalPackage)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              <div className="bg-white rounded-xl p-5 mb-6 border border-slate-100">
-                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <TrendingUp size={18} className="text-amber-600" />
-                  整体薪酬分布
-                </h3>
-                <div className="relative">
-                  <div className="flex items-end gap-3 h-32">
-                    {(() => {
-                      const min = salaryEstimation.overallRange.min;
-                      const max = salaryEstimation.overallRange.max;
-                      const range = max - min;
-                      const heights = salaryEstimation.percentiles.map((p) => {
-                        return ((p.medianSalary - min) / range) * 85 + 15;
-                      });
-                      return salaryEstimation.percentiles.map((p, idx) => {
-                        const colors = ['bg-slate-400', 'bg-blue-500', 'bg-emerald-500'];
-                        return (
-                          <div key={p.percentile} className="flex-1 flex flex-col items-center justify-end gap-2">
-                            <div className="text-xs font-bold text-slate-700">
-                              {formatSalary(p.medianSalary)}
+              <div className="grid lg:grid-cols-2 gap-4 mb-6">
+                <div className="bg-white rounded-xl p-5 border border-slate-100">
+                  <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <TrendingUp size={18} className="text-amber-600" />
+                    年度总包对比
+                  </h3>
+                  <div className="relative">
+                    <div className="flex items-end gap-3 h-40">
+                      {(() => {
+                        const min = salaryEstimation.percentiles[0].annualTotalPackage;
+                        const max = salaryEstimation.percentiles[2].annualTotalPackage;
+                        const range = max - min;
+                        return salaryEstimation.percentiles.map((p, idx) => {
+                          const heights = range > 0
+                            ? ((p.annualTotalPackage - min) / range) * 70 + 30
+                            : 50;
+                          const colors = ['bg-slate-400', 'bg-blue-500', 'bg-emerald-500'];
+                          const labels = ['保守', '中位', '竞争力'];
+                          return (
+                            <div key={p.percentile} className="flex-1 flex flex-col items-center justify-end gap-2">
+                              <div className="text-xs font-bold text-slate-800 mb-1">
+                                {formatSalary(p.annualTotalPackage)}
+                                <span className="text-slate-400 font-normal">/年</span>
+                              </div>
+                              <div
+                                className={`w-full rounded-t-lg ${colors[idx]} transition-all hover:opacity-80 relative group`}
+                                style={{ height: `${heights}%` }}
+                              >
+                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                  {labels[idx]}：{formatSalary(p.annualTotalPackage)}
+                                </div>
+                              </div>
+                              <div className="text-xs font-semibold text-slate-600">
+                                P{p.percentile}
+                              </div>
+                              <div className="text-xs text-slate-400">
+                                {formatSalary(p.monthlyCash)}/月现金
+                              </div>
                             </div>
-                            <div
-                              className={`w-full rounded-t-lg ${colors[idx]} transition-all hover:opacity-80`}
-                              style={{ height: `${heights[idx]}%` }}
-                            />
-                            <div className="text-xs text-slate-500 font-medium">
-                              P{p.percentile}
-                            </div>
-                          </div>
-                        );
-                      });
-                    })()}
+                          );
+                        });
+                      })()}
+                    </div>
+                    <div className="absolute left-0 bottom-0 w-full h-0.5 bg-slate-200" />
                   </div>
-                  <div className="absolute left-0 bottom-0 w-full h-0.5 bg-slate-200" />
+                </div>
+
+                <div className="bg-white rounded-xl p-5 border border-slate-100">
+                  <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <BarChart3 size={18} className="text-indigo-600" />
+                    中位薪酬构成占比
+                  </h3>
+                  <div className="space-y-3">
+                    {salaryEstimation.medianPackage.map((pkg, idx) => {
+                      const colors = [
+                        'from-sky-400 to-blue-500',
+                        'from-violet-400 to-purple-500',
+                        'from-amber-400 to-orange-500',
+                        'from-rose-400 to-red-500',
+                        'from-emerald-400 to-teal-500',
+                        'from-pink-400 to-fuchsia-500',
+                      ];
+                      const color = colors[idx % colors.length];
+                      return (
+                        <div key={idx} className="group">
+                          <div className="flex items-center justify-between text-sm mb-1">
+                            <span className="font-medium text-slate-700 flex items-center gap-1.5">
+                              <span className="text-base">{pkg.icon}</span>
+                              {pkg.name}
+                            </span>
+                            <span className="text-slate-500 text-xs">
+                              {formatSalary(pkg.monthlyAmount)}/月 · <span className="font-bold text-slate-700">{formatSalary(pkg.annualAmount)}/年</span>
+                              <span className="ml-1 font-semibold text-slate-800">({pkg.percentage}%)</span>
+                            </span>
+                          </div>
+                          <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full bg-gradient-to-r ${color} rounded-full transition-all group-hover:brightness-110`}
+                              style={{ width: `${Math.max(pkg.percentage, 3)}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between bg-gradient-to-r from-amber-50 to-orange-50 -mx-5 -mb-5 px-5 py-3 rounded-b-xl">
+                    <span className="font-bold text-slate-800">年度总包合计</span>
+                    <span className="text-xl font-bold text-orange-600">
+                      {formatSalary(salaryEstimation.overallRange.medianTotalPackage)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl p-5 mb-6 border border-blue-100">
+                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <Sparkles size={18} className="text-blue-600" />
+                  中位水平薪酬构成明细（50分位）
+                </h3>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {salaryEstimation.medianPackage.map((pkg, idx) => {
+                    const cardColors = [
+                      'from-sky-50 to-blue-100 border-sky-200',
+                      'from-violet-50 to-purple-100 border-violet-200',
+                      'from-amber-50 to-orange-100 border-amber-200',
+                      'from-rose-50 to-red-100 border-rose-200',
+                      'from-emerald-50 to-teal-100 border-emerald-200',
+                      'from-pink-50 to-fuchsia-100 border-pink-200',
+                    ];
+                    const cardColor = cardColors[idx % cardColors.length];
+                    return (
+                      <div
+                        key={idx}
+                        className={`rounded-xl p-4 bg-gradient-to-br ${cardColor} border hover:shadow-md transition-shadow`}
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl">{pkg.icon}</span>
+                          <div className="font-bold text-slate-800">{pkg.name}</div>
+                        </div>
+                        <div className="text-2xl font-bold text-slate-900 mb-0.5">
+                          {formatSalary(pkg.monthlyAmount)}
+                          <span className="text-xs font-normal text-slate-500 ml-0.5">/月</span>
+                        </div>
+                        <div className="text-sm font-semibold text-slate-700 mb-2">
+                          年 {formatSalary(pkg.annualAmount)}
+                          <span className="ml-1.5 text-xs bg-white/70 px-1.5 py-0.5 rounded font-bold">
+                            占 {pkg.percentage}%
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          {pkg.description}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -515,11 +636,23 @@ export default function InterviewQuestions() {
                     <Shield size={18} />
                     公司薪酬带宽
                   </h3>
-                  <div className="text-2xl font-bold text-blue-700 mb-2">
-                    {formatSalary(salaryEstimation.companyBandwidth.min)} - {formatSalary(salaryEstimation.companyBandwidth.max)}
-                    <span className="text-sm font-normal ml-1">{salaryEstimation.unit}</span>
+                  <div className="mb-3">
+                    <div className="text-xs font-semibold text-blue-800 mb-1">月度基本工资</div>
+                    <div className="text-xl font-bold text-blue-700">
+                      {formatSalary(salaryEstimation.companyBandwidth.min)} - {formatSalary(salaryEstimation.companyBandwidth.max)}
+                      <span className="text-sm font-normal ml-1">K/月</span>
+                    </div>
                   </div>
-                  <p className="text-sm text-blue-800 leading-relaxed">
+                  <div className="pt-3 border-t border-blue-200 mb-2">
+                    <div className="text-xs font-semibold text-indigo-800 mb-1">年度总包范围</div>
+                    <div className="text-2xl font-bold text-indigo-700">
+                      {formatSalary(salaryEstimation.companyBandwidth.minTotalPackage)}
+                      <span className="mx-1 text-indigo-400">~</span>
+                      {formatSalary(salaryEstimation.companyBandwidth.maxTotalPackage)}
+                      <span className="text-sm font-normal ml-1">/年</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-blue-800 leading-relaxed pt-2">
                     {salaryEstimation.companyBandwidth.description}
                   </p>
                 </div>

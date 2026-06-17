@@ -221,12 +221,25 @@ export interface EvaluationResult {
   evaluatedAt: Date;
 }
 
+export interface SalaryBreakdown {
+  baseSalary: number;
+  performanceBonus: number;
+  yearEndBonus: number;
+  stockOptions: number;
+  allowances: number;
+  benefitsValue: number;
+}
+
 export interface SalaryPercentile {
   percentile: '25' | '50' | '75';
   label: string;
   minSalary: number;
   maxSalary: number;
   medianSalary: number;
+  monthlyCash: number;
+  annualCash: number;
+  annualTotalPackage: number;
+  breakdown: SalaryBreakdown;
 }
 
 export interface MarketDemandInfo {
@@ -243,6 +256,15 @@ export interface SalaryBenchmarkSource {
   description: string;
 }
 
+export interface CompensationPackage {
+  name: string;
+  monthlyAmount: number;
+  annualAmount: number;
+  percentage: number;
+  description: string;
+  icon: string;
+}
+
 export interface SalaryEstimation {
   id: string;
   jobPositionId: string;
@@ -257,13 +279,19 @@ export interface SalaryEstimation {
     min: number;
     max: number;
     median: number;
+    medianMonthlyCash: number;
+    medianAnnualCash: number;
+    medianTotalPackage: number;
   };
+  medianPackage: CompensationPackage[];
   marketDemand: MarketDemandInfo;
   benchmarks: SalaryBenchmarkSource[];
   companyBandwidth: {
     min: number;
     max: number;
     description: string;
+    minTotalPackage: number;
+    maxTotalPackage: number;
   };
   negotiationTips: string[];
   generatedAt: Date;
