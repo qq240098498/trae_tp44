@@ -72,12 +72,49 @@ export interface BiasCheckResult {
   isFair: boolean;
 }
 
+export type RedFlagType =
+  | 'noQuantifiedAchievement'
+  | 'frequentJobChange'
+  | 'skillGap'
+  | 'careerGap'
+  | 'unclearResponsibility'
+  | 'overqualified'
+  | 'underqualified';
+
+export interface ResumeRedFlag {
+  id: string;
+  type: RedFlagType;
+  severity: 'high' | 'medium' | 'low';
+  title: string;
+  description: string;
+  evidence: string[];
+  suggestion: string;
+}
+
+export type QuestionCategory =
+  | 'professional'
+  | 'softSkill'
+  | 'culturalFit'
+  | 'basicInfo'
+  | 'followUp';
+
 export interface InterviewQuestion {
   id: string;
-  category: 'professional' | 'softSkill' | 'culturalFit';
+  category: QuestionCategory;
   question: string;
   expectedPoints: string[];
   difficulty: 'easy' | 'medium' | 'hard';
+  source?: 'base' | 'jd' | 'resume' | 'redFlag';
+  relatedRedFlagId?: string;
+  priority?: number;
+}
+
+export interface ResumeAnalysisResult {
+  resumeId: string;
+  redFlags: ResumeRedFlag[];
+  strengths: string[];
+  concernAreas: string[];
+  generatedAt: Date;
 }
 
 export interface InterviewEvaluation {
@@ -180,6 +217,7 @@ export interface EvaluationResult {
   talentProfileMatch?: TalentProfileMatchResult;
   overallScore: number;
   biasCheck: BiasCheckResult;
+  resumeAnalysis?: ResumeAnalysisResult;
   evaluatedAt: Date;
 }
 

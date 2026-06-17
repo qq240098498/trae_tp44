@@ -251,6 +251,30 @@ export const softSkillQuestions: Omit<InterviewQuestion, 'id'>[] = [
   }
 ];
 
+export const basicInfoQuestions: Omit<InterviewQuestion, 'id'>[] = [
+  {
+    category: 'basicInfo',
+    question: '请简单介绍一下你自己，包括你的成长背景和为什么选择这个行业。',
+    expectedPoints: ['表达清晰有条理', '成长背景与职业选择相关联', '展现对行业的热情', '突出关键经历和转折点'],
+    difficulty: 'easy',
+    source: 'base',
+  },
+  {
+    category: 'basicInfo',
+    question: '在工作之余，你有什么兴趣爱好？这些爱好对你的工作有什么积极影响？',
+    expectedPoints: ['兴趣爱好真实具体', '能够关联到工作能力的提升', '展现综合素质', '体现积极的生活态度'],
+    difficulty: 'easy',
+    source: 'base',
+  },
+  {
+    category: 'basicInfo',
+    question: '你如何评价自己的沟通能力和团队协作能力？请举例说明。',
+    expectedPoints: ['有客观的自我认知', '有具体案例支撑', '体现协作意识', '展现沟通技巧'],
+    difficulty: 'medium',
+    source: 'base',
+  },
+];
+
 export const culturalFitQuestions: Omit<InterviewQuestion, 'id'>[] = [
   {
     category: 'culturalFit',

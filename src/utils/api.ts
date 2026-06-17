@@ -6,8 +6,8 @@ import type {
   InterviewQuestion,
   InterviewEvaluation,
   HiringRecommendation,
-  ApiResponse,
   HighPerformerProfile,
+  ResumeAnalysisResult,
 } from '../../shared/types';
 
 const API_BASE = '/api';
@@ -82,6 +82,26 @@ export const api = {
   interviewQuestions: {
     generate: (jobPositionId: string, resumeId?: string) =>
       request<InterviewQuestion[]>('/interview-questions/generate', {
+        method: 'POST',
+        body: JSON.stringify({ jobPositionId, resumeId }),
+      }),
+    analyzeResume: (resumeId: string, jobPositionId?: string) =>
+      request<ResumeAnalysisResult>('/interview-questions/analyze-resume', {
+        method: 'POST',
+        body: JSON.stringify({ resumeId, jobPositionId }),
+      }),
+    generateFollowUp: (resumeId: string, jobPositionId?: string) =>
+      request<{ questions: InterviewQuestion[]; analysis: ResumeAnalysisResult }>(
+        '/interview-questions/generate-follow-up',
+        {
+          method: 'POST',
+          body: JSON.stringify({ resumeId, jobPositionId }),
+        }
+      ),
+    getBasicQuestionBank: () =>
+      request<InterviewQuestion[]>('/interview-questions/basic-question-bank'),
+    generateBasicQuestions: (jobPositionId: string, resumeId?: string) =>
+      request<InterviewQuestion[]>('/interview-questions/basic-questions', {
         method: 'POST',
         body: JSON.stringify({ jobPositionId, resumeId }),
       }),

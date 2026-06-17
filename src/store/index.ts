@@ -8,6 +8,7 @@ import type {
   HiringRecommendation,
   JobDescriptionForm,
   HighPerformerProfile,
+  ResumeAnalysisResult,
 } from '../../shared/types';
 import { api } from '../utils/api';
 
@@ -27,6 +28,15 @@ interface AppState {
 
   interviewQuestions: InterviewQuestion[];
   setInterviewQuestions: (questions: InterviewQuestion[]) => void;
+
+  resumeAnalysis: ResumeAnalysisResult | null;
+  setResumeAnalysis: (analysis: ResumeAnalysisResult | null) => void;
+
+  followUpQuestions: InterviewQuestion[];
+  setFollowUpQuestions: (questions: InterviewQuestion[]) => void;
+
+  basicInfoQuestions: InterviewQuestion[];
+  setBasicInfoQuestions: (questions: InterviewQuestion[]) => void;
 
   currentInterviewEvaluation: InterviewEvaluation | null;
   setCurrentInterviewEvaluation: (evaluation: InterviewEvaluation | null) => void;
@@ -71,6 +81,15 @@ export const useAppStore = create<AppState>((set) => ({
 
   interviewQuestions: [],
   setInterviewQuestions: (questions) => set({ interviewQuestions: questions }),
+
+  resumeAnalysis: null,
+  setResumeAnalysis: (analysis) => set({ resumeAnalysis: analysis }),
+
+  followUpQuestions: [],
+  setFollowUpQuestions: (questions) => set({ followUpQuestions: questions }),
+
+  basicInfoQuestions: [],
+  setBasicInfoQuestions: (questions) => set({ basicInfoQuestions: questions }),
 
   currentInterviewEvaluation: null,
   setCurrentInterviewEvaluation: (evaluation) =>
@@ -119,6 +138,9 @@ export const useAppStore = create<AppState>((set) => ({
     set({
       currentEvaluation: null,
       interviewQuestions: [],
+      resumeAnalysis: null,
+      followUpQuestions: [],
+      basicInfoQuestions: [],
       currentInterviewEvaluation: null,
       hiringRecommendation: null,
     }),
