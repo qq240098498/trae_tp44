@@ -24,6 +24,14 @@ import { copyToClipboard, downloadFile } from '../utils/helpers';
 import { mockResumes } from '../data/mockData';
 
 const categoryConfig = {
+  basicInfo: {
+    label: '基础信息',
+    icon: BookOpen,
+    color: 'from-slate-500 to-slate-600',
+    bgColor: 'bg-slate-50',
+    textColor: 'text-slate-700',
+    borderColor: 'border-slate-200',
+  },
   professional: {
     label: '专业能力',
     icon: Brain,
@@ -48,6 +56,14 @@ const categoryConfig = {
     textColor: 'text-purple-700',
     borderColor: 'border-purple-200',
   },
+  followUp: {
+    label: '针对性追问',
+    icon: AlertTriangle,
+    color: 'from-rose-500 to-rose-600',
+    bgColor: 'bg-rose-50',
+    textColor: 'text-rose-700',
+    borderColor: 'border-rose-200',
+  },
 };
 
 const difficultyConfig = {
@@ -69,7 +85,7 @@ export default function InterviewQuestions() {
     setResumes,
   } = useAppStore();
 
-  const [activeCategory, setActiveCategory] = useState<'all' | 'professional' | 'softSkill' | 'culturalFit'>('all');
+  const [activeCategory, setActiveCategory] = useState<'all' | 'basicInfo' | 'professional' | 'softSkill' | 'culturalFit' | 'followUp'>('all');
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
   const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -150,10 +166,12 @@ export default function InterviewQuestions() {
     : interviewQuestions.filter(q => q.category === activeCategory);
 
   const categoryStats = {
-  professional: interviewQuestions.filter(q => q.category === 'professional').length,
-  softSkill: interviewQuestions.filter(q => q.category === 'softSkill').length,
-  culturalFit: interviewQuestions.filter(q => q.category === 'culturalFit').length,
-};
+    basicInfo: interviewQuestions.filter(q => q.category === 'basicInfo').length,
+    professional: interviewQuestions.filter(q => q.category === 'professional').length,
+    softSkill: interviewQuestions.filter(q => q.category === 'softSkill').length,
+    culturalFit: interviewQuestions.filter(q => q.category === 'culturalFit').length,
+    followUp: interviewQuestions.filter(q => q.category === 'followUp').length,
+  };
 
   return (
     <div className="animate-fade-in">
@@ -261,6 +279,10 @@ export default function InterviewQuestions() {
               <h3 className="font-bold text-emerald-900 mb-4">问题统计</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
+                  <span className="text-emerald-800">基础信息</span>
+                  <span className="font-bold text-emerald-600">{categoryStats.basicInfo} 题</span>
+                </div>
+                <div className="flex items-center justify-between">
                   <span className="text-emerald-800">专业能力</span>
                   <span className="font-bold text-emerald-600">{categoryStats.professional} 题</span>
                 </div>
@@ -272,6 +294,12 @@ export default function InterviewQuestions() {
                   <span className="text-emerald-800">文化适配</span>
                   <span className="font-bold text-emerald-600">{categoryStats.culturalFit} 题</span>
                 </div>
+                {categoryStats.followUp > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-rose-700">针对性追问</span>
+                    <span className="font-bold text-rose-600">{categoryStats.followUp} 题</span>
+                  </div>
+                )}
                 <div className="border-t border-emerald-200 pt-3 mt-3">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-emerald-900">总计</span>
@@ -288,7 +316,7 @@ export default function InterviewQuestions() {
             <>
               <div className="flex items-center justify-between">
                 <div className="flex gap-2">
-                  {(['all', 'professional', 'softSkill', 'culturalFit'] as const).map((cat) => (
+                  {(['all', 'basicInfo', 'professional', 'softSkill', 'culturalFit', 'followUp'] as const).map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setActiveCategory(cat)}
