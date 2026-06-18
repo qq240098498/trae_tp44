@@ -10,6 +10,7 @@ import {
   Menu,
   X,
   Scale,
+  AlertTriangle,
 } from 'lucide-react';
 
 const navigation = [
@@ -19,6 +20,7 @@ const navigation = [
   { name: '面试问题', path: '/interview-questions', icon: ClipboardList },
   { name: '面试评价', path: '/interview-evaluation', icon: MessageSquare },
   { name: '录用决策', path: '/hiring-decision', icon: CheckCircle2 },
+  { name: '离职风险评估', path: '/attrition-risk', icon: AlertTriangle },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {

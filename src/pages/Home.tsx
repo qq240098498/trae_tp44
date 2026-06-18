@@ -13,6 +13,7 @@ import {
   BarChart3,
   Shield,
   Zap,
+  AlertTriangle,
 } from 'lucide-react';
 import { mockResumes, mockJobPositions } from '../data/mockData';
 import type { EvaluationResult } from '../../shared/types';
@@ -57,6 +58,14 @@ const features = [
     path: '/hiring-decision',
     color: 'from-rose-500 to-rose-600',
     stats: 'AI 辅助',
+  },
+  {
+    icon: AlertTriangle,
+    title: '离职风险评估',
+    description: '综合分析出勤变化、加班频率、沟通活跃度等行为信号，识别高风险员工并推荐保留策略。',
+    path: '/attrition-risk',
+    color: 'from-orange-500 to-red-600',
+    stats: '智能预警',
   },
 ];
 

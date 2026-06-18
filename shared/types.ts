@@ -297,6 +297,95 @@ export interface SalaryEstimation {
   generatedAt: Date;
 }
 
+export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
+
+export interface BehaviorSignal {
+  id: string;
+  name: string;
+  description: string;
+  category: 'attendance' | 'overtime' | 'communication' | 'project' | 'performance' | 'career';
+  currentValue: number;
+  baselineValue: number;
+  trend: 'up' | 'down' | 'stable';
+  changeRate: number;
+  unit: string;
+  isAbnormal: boolean;
+  weight: number;
+  threshold: { warning: number; critical: number };
+  historicalData: Array<{ period: string; value: number }>;
+}
+
+export interface RiskIndicator {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  triggered: boolean;
+  severity: RiskLevel;
+  score: number;
+  evidence: string[];
+  suggestion: string;
+}
+
+export interface RetentionStrategy {
+  id: string;
+  title: string;
+  category: 'challenge' | 'growth' | 'compensation' | 'culture' | 'worklife' | 'recognition';
+  priority: 'immediate' | 'short_term' | 'medium_term' | 'long_term';
+  description: string;
+  actions: string[];
+  expectedImpact: string;
+  timeline: string;
+  responsibleRole: string;
+}
+
+export interface AttritionRiskAssessment {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  position: string;
+  department: string;
+  level: string;
+  tenure: number;
+  overallRiskLevel: RiskLevel;
+  riskScore: number;
+  assessmentDate: Date;
+  validUntil: Date;
+  behaviorSignals: BehaviorSignal[];
+  riskIndicators: RiskIndicator[];
+  retentionStrategies: RetentionStrategy[];
+  riskBreakdown: {
+    attendance: number;
+    overtime: number;
+    communication: number;
+    project: number;
+    performance: number;
+    career: number;
+  };
+  summary: {
+    keyFindings: string[];
+    immediateConcerns: string[];
+    positiveSignals: string[];
+  };
+  peerComparison: {
+    departmentAvgRiskScore: number;
+    companyAvgRiskScore: number;
+    percentile: number;
+  };
+}
+
+export interface Employee {
+  id: string;
+  name: string;
+  position: string;
+  department: string;
+  level: string;
+  hireDate: Date;
+  lastPromotionDate?: Date;
+  manager?: string;
+  avatar?: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;

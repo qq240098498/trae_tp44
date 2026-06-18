@@ -6,6 +6,7 @@ import ResumeScreening from "./pages/ResumeScreening";
 import InterviewQuestions from "./pages/InterviewQuestions";
 import InterviewEvaluation from "./pages/InterviewEvaluation";
 import HiringDecision from "./pages/HiringDecision";
+import AttritionRisk from "./pages/AttritionRisk";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/interview-questions" element={<InterviewQuestions />} />
           <Route path="/interview-evaluation" element={<InterviewEvaluation />} />
           <Route path="/hiring-decision" element={<HiringDecision />} />
+          <Route path="/attrition-risk" element={<AttritionRisk />} />
         </Routes>
       </Layout>
     </Router>

@@ -10,6 +10,8 @@ import type {
   HighPerformerProfile,
   ResumeAnalysisResult,
   SalaryEstimation,
+  AttritionRiskAssessment,
+  Employee,
 } from '../../shared/types';
 import { api } from '../utils/api';
 
@@ -65,6 +67,18 @@ interface AppState {
   salaryEstimation: SalaryEstimation | null;
   setSalaryEstimation: (estimation: SalaryEstimation | null) => void;
   generateSalaryEstimation: (jobPositionId: string, options?: { location?: string; industry?: string }) => Promise<void>;
+
+  employees: Employee[];
+  setEmployees: (employees: Employee[]) => void;
+  selectedEmployeeId: string | null;
+  setSelectedEmployeeId: (id: string | null) => void;
+  attritionRiskAssessment: AttritionRiskAssessment | null;
+  setAttritionRiskAssessment: (assessment: AttritionRiskAssessment | null) => void;
+  riskAssessments: AttritionRiskAssessment[];
+  setRiskAssessments: (assessments: AttritionRiskAssessment[]) => void;
+  generateAttritionRiskAssessment: (employeeId: string) => Promise<void>;
+  loadEmployees: (params?: { department?: string; position?: string }) => Promise<void>;
+  loadAllRiskAssessments: () => Promise<void>;
 
   resetState: () => void;
 }
@@ -149,6 +163,41 @@ export const useAppStore = create<AppState>((set) => ({
     } catch (error) {
       console.error('生成薪酬估算失败:', error);
       set({ loading: false });
+    }
+  },
+
+  employees: [],
+  setEmployees: (employees) => set({ employees }),
+  selectedEmployeeId: null,
+  setSelectedEmployeeId: (id) => set({ selectedEmployeeId: id }),
+  attritionRiskAssessment: null,
+  setAttritionRiskAssessment: (assessment) => set({ attritionRiskAssessment: assessment }),
+  riskAssessments: [],
+  setRiskAssessments: (assessments) => set({ riskAssessments: assessments }),
+  generateAttritionRiskAssessment: async (employeeId) => {
+    set({ loading: true });
+    try {
+      const result = await api.attritionRisk.assess(employeeId);
+      set({ attritionRiskAssessment: result, loading: false });
+    } catch (error) {
+      console.error('生成离职风险评估失败:', error);
+      set({ loading: false });
+    }
+  },
+  loadEmployees: async (params) => {
+    try {
+      const result = await api.attritionRisk.listEmployees(params);
+      set({ employees: result });
+    } catch (error) {
+      console.error('加载员工列表失败:', error);
+    }
+  },
+  loadAllRiskAssessments: async () => {
+    try {
+      const result = await api.attritionRisk.listAllAssessments();
+      set({ riskAssessments: result });
+    } catch (error) {
+      console.error('加载风险评估列表失败:', error);
     }
   },
 

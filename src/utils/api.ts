@@ -9,6 +9,8 @@ import type {
   HighPerformerProfile,
   ResumeAnalysisResult,
   SalaryEstimation,
+  AttritionRiskAssessment,
+  Employee,
 } from '../../shared/types';
 
 const API_BASE = '/api';
@@ -241,5 +243,38 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ jobPositionId, ...options }),
       }),
+  },
+
+  attritionRisk: {
+    listEmployees: (params?: { department?: string; position?: string }) => {
+      const query = new URLSearchParams();
+      if (params?.department) query.set('department', params.department);
+      if (params?.position) query.set('position', params.position);
+      const queryStr = query.toString() ? `?${query.toString()}` : '';
+      return request<Employee[]>(`/attrition-risk/employees${queryStr}`);
+    },
+    assess: (employeeId: string) =>
+      request<AttritionRiskAssessment>('/attrition-risk/assess', {
+        method: 'POST',
+        body: JSON.stringify({ employeeId }),
+      }),
+    listAllAssessments: () =>
+      request<AttritionRiskAssessment[]>('/attrition-risk/all-assessments'),
+    batchAssess: (employeeIds: string[]) =>
+      request<AttritionRiskAssessment[]>('/attrition-risk/batch-assess', {
+        method: 'POST',
+        body: JSON.stringify({ employeeIds }),
+      }),
+    getDepartmentStats: (department?: string) => {
+      const query = department ? `?department=${department}` : '';
+      return request<{
+        totalEmployees: number;
+        highRiskCount: number;
+        mediumRiskCount: number;
+        lowRiskCount: number;
+        avgRiskScore: number;
+        topRisks: Array<{ name: string; count: number; percentage: number }>;
+      }>(`/attrition-risk/department-stats${query}`);
+    },
   },
 };
